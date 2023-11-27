@@ -41,7 +41,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                     id = geofence.requestId,
                     latitude = geofencingEvent.triggeringLocation?.latitude ?: -1.0,
                     longitude = geofencingEvent.triggeringLocation?.longitude ?: -1.0,
-                    radius = 50.0.toFloat(),
+                    radius = 150.0.toFloat(),
                     events = listOf(event)
                 )
 
