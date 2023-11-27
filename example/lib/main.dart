@@ -9,6 +9,7 @@ import 'package:flutter_geofence/geofence.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     new FlutterLocalNotificationsPlugin();
@@ -26,23 +27,41 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static final calcabenApartment = <String, dynamic>{
-    'lat': 9.627392,
-    'long': 123.8784023,
-    'name': 'Calcaben Apartment',
-    'radius': 150.0
-  };
-  final enterLocation = Geolocation(
-    latitude: calcabenApartment['lat'] as double,
-    longitude: calcabenApartment['long'] as double,
-    radius: calcabenApartment['radius'] as double,
-    id: '${calcabenApartment['name']}_enter',
+  final enterLocation1 = Geolocation(
+    latitude: 48.16911,
+    longitude: 11.53429,
+    radius: 200,
+    id: 'test_id1_enter',
   );
-  final exitLocation = Geolocation(
-    latitude: calcabenApartment['lat'] as double,
-    longitude: calcabenApartment['long'] as double,
-    radius: calcabenApartment['radius'] as double,
-    id: '${calcabenApartment['name']}_exit',
+  final exitLocation1 = Geolocation(
+    latitude: 48.16911,
+    longitude: 11.53429,
+    radius: 200,
+    id: 'test_id1_exit',
+  );
+  final enterLocation2 = Geolocation(
+    latitude: 48.17034,
+    longitude: 11.53235,
+    radius: 200,
+    id: 'test_id2_enter',
+  );
+  final exitLocation2 = Geolocation(
+    latitude: 48.17034,
+    longitude: 11.53235,
+    radius: 200,
+    id: 'test_id2_exit',
+  );
+  final enterLocation3 = Geolocation(
+    latitude: 48.16917,
+    longitude: 11.5295,
+    radius: 200,
+    id: 'test_id3_enter',
+  );
+  final exitLocation3 = Geolocation(
+    latitude: 48.16917,
+    longitude: 11.5295,
+    radius: 200,
+    id: 'test_id3_exit',
   );
   String _message = "Message\n\n";
   late StreamSubscription<String> streamSubscription;
@@ -75,17 +94,19 @@ class _MyAppState extends State<MyApp> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                calcabenApartment['name'],
+                'test',
                 style: TextStyle(fontSize: 30),
               ),
               MaterialButton(
                 color: Colors.lightBlueAccent,
                 child: Text('Add Coordinates'),
                 onPressed: () {
-                  addGeolocation(enterLocation, GeolocationEvent.entry);
-                  addGeolocation(exitLocation, GeolocationEvent.exit);
-                  showSnackbar(
-                      '${calcabenApartment['name']} added to geofence');
+                  addGeolocation(enterLocation1, GeolocationEvent.entry);
+                  addGeolocation(exitLocation1, GeolocationEvent.exit);
+                  addGeolocation(enterLocation2, GeolocationEvent.entry);
+                  addGeolocation(exitLocation2, GeolocationEvent.exit);
+                  addGeolocation(enterLocation3, GeolocationEvent.entry);
+                  addGeolocation(exitLocation3, GeolocationEvent.exit);
                 },
               ),
               MaterialButton(
@@ -104,10 +125,16 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _init() async {
+    final sp = await SharedPreferences.getInstance();
+
+    final list = sp.getStringList('key') ?? [];
+
+    list.forEach(print);
+
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS =
-    DarwinInitializationSettings(onDidReceiveLocalNotification: null);
+        DarwinInitializationSettings(onDidReceiveLocalNotification: null);
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -129,7 +156,7 @@ class _MyAppState extends State<MyApp> {
   void addGeolocation(Geolocation geolocation, GeolocationEvent event) {
     Geofence.addGeolocation(geolocation, event).then((onValue) {
       final message =
-          '${event.name.split('.').last}: Your geofence has been added! ${geolocation.id}';
+          '${event.name.split('.').last}: Geofence added! ${geolocation.id}';
       print(message);
       addLog(message);
     }).catchError((error) {
@@ -143,7 +170,7 @@ class _MyAppState extends State<MyApp> {
 
   void addLog(String s) {
     setState(() {
-      _message = "$_message$s\n";
+      _message = _message + "-----------------------\n ${DateTime.now()}\n$s\n";
     });
   }
 
@@ -158,14 +185,44 @@ class _MyAppState extends State<MyApp> {
         android: androidPlatformChannelSpecifics,
         iOS: iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(
-        rng.nextInt(100000), title, subtitle, platformChannelSpecifics,
-        payload: 'item x');
+      rng.nextInt(100000),
+      title,
+      subtitle,
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
   }
 }
 
 Future<void> geofenceEventCallback(
-    Geolocation geolocation, GeolocationEvent event) async {
+  Geolocation geolocation,
+  GeolocationEvent event,
+) async {
   print(
       'geofenceEventCallback: geolocation:${geolocation.id} event:${event.name}');
-  geoeventStream.add('geolocation:${geolocation.id} event:${event.name}');
+  geoeventStream.add('geolocation:${geolocation.id}');
+
+  final sp = await SharedPreferences.getInstance();
+
+  final list = sp.getStringList('key') ?? [];
+
+  list.add('${DateTime.now()} ------------ ${geolocation.id} ------- geofence');
+
+  sp.setStringList('key', list);
+
+  var rng = new Random();
+  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'your channel id', 'your channel name',
+      importance: Importance.high, priority: Priority.high, ticker: 'ticker');
+  var iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+  var platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics);
+  await flutterLocalNotificationsPlugin.show(
+    rng.nextInt(100000),
+    'Callback from background',
+    geolocation.id,
+    platformChannelSpecifics,
+    payload: 'item x',
+  );
 }

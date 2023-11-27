@@ -16,6 +16,7 @@ dependencies:
   permission_handler: ^10.2.0
   geocoding: ^2.1.0
   rxdart: ^0.27.7
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
