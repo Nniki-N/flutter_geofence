@@ -211,7 +211,7 @@ public class SwiftFlutterGeofencePlugin: NSObject, FlutterPlugin {
 		default:
 			events = [.entry, .exit]
 		}
-		let georegion = GeoRegion(id: identifier, radius: radius ?? 50.0, latitude: latitude, longitude: longitude, events: events)
+		let georegion = GeoRegion(id: identifier, radius: radius ?? 150.0, latitude: latitude, longitude: longitude, events: events)
 		geofenceManager.startMonitoring(georegion: georegion)
 	}
 	
@@ -225,7 +225,7 @@ public class SwiftFlutterGeofencePlugin: NSObject, FlutterPlugin {
 		default:
 			events = [.entry, .exit]
 		}
-		let georegion = GeoRegion(id: identifier, radius: radius ?? 50.0, latitude: latitude, longitude: longitude, events: events)
+		let georegion = GeoRegion(id: identifier, radius: radius ?? 150.0, latitude: latitude, longitude: longitude, events: events)
 		geofenceManager.stopMonitoring(georegion: georegion)
 	}
 }
